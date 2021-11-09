@@ -1,16 +1,26 @@
 #include <raylib.h>
+#define RAYGUI_IMPLEMENTATION
+#include "extras/raygui.h"
 #include <iostream>
+#include <vector>
+#include <utility>
+#include <memory>
 
+#include "MainManager.h"
+
+
+//(0,0) : Top-Left Corner
 int main()
 {
+
     // Initialization
        //--------------------------------------------------------------------------------------
-    const int screenWidth = 800;
-    const int screenHeight = 450;
+    static const int WINDOW_SCREENWIDTH = 800;
+    static const int WINDOW_SCREENHEIGHT = 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - keyboard input");
-
-    Vector2 ballPosition = { (float)screenWidth / 2, (float)screenHeight / 2 };
+    InitWindow(WINDOW_SCREENWIDTH, WINDOW_SCREENHEIGHT, "MAT354 Project");
+    std::unique_ptr<MainManager> mainManager = std::make_unique<MainManager>();
+    mainManager->Initialize();
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -20,26 +30,24 @@ int main()
     {
         // Update
         //----------------------------------------------------------------------------------
-        if (IsKeyDown(KEY_RIGHT)) ballPosition.x += 2.0f;
-        if (IsKeyDown(KEY_LEFT)) ballPosition.x -= 2.0f;
-        if (IsKeyDown(KEY_UP)) ballPosition.y -= 2.0f;
-        if (IsKeyDown(KEY_DOWN)) ballPosition.y += 2.0f;
+        mainManager->Update();
         //----------------------------------------------------------------------------------
 
+
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
         // Draw
         //----------------------------------------------------------------------------------
-        BeginDrawing();
-
-        ClearBackground(RAYWHITE);
-
-        DrawText("move the ball with arrow keys", 10, 10, 20, DARKGRAY);
-
-        DrawCircleV(ballPosition, 50, MAROON);
-
-        EndDrawing();
+        mainManager->Draw();
         //----------------------------------------------------------------------------------
-    }
 
+        // Draw GUI
+        //----------------------------------------------------------------------------------
+        mainManager->DrawGUI();
+        //----------------------------------------------------------------------------------
+        EndDrawing();
+    }
+    mainManager->Clear();
     // De-Initialization
     //--------------------------------------------------------------------------------------
     CloseWindow();        // Close window and OpenGL context

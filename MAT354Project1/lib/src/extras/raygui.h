@@ -182,6 +182,9 @@
 #ifndef RAYGUI_H
 #define RAYGUI_H
 
+#pragma warning(disable:4244)
+#pragma warning(disable:4456)
+
 #define RAYGUI_VERSION  "3.0"
 
 #if !defined(RAYGUI_STANDALONE)
