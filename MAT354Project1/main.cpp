@@ -18,6 +18,8 @@ int main()
     static const int WINDOW_SCREENWIDTH = 800;
     static const int WINDOW_SCREENHEIGHT = 450;
 
+    bool showGUI = true;
+
     InitWindow(WINDOW_SCREENWIDTH, WINDOW_SCREENHEIGHT, "MAT354 Project");
     std::unique_ptr<MainManager> mainManager = std::make_unique<MainManager>();
     mainManager->Initialize();
@@ -43,7 +45,12 @@ int main()
 
         // Draw GUI
         //----------------------------------------------------------------------------------
-        mainManager->DrawGUI();
+
+        if (IsKeyPressed(KEY_O))
+            showGUI = !showGUI;
+
+        if(showGUI)
+            mainManager->DrawGUI();
         //----------------------------------------------------------------------------------
         EndDrawing();
     }

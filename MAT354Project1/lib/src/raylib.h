@@ -188,6 +188,19 @@
 typedef struct Vector2 {
     float x;                // Vector x component
     float y;                // Vector y component
+
+    friend bool operator==(const Vector2& a, const Vector2& b)
+    {
+        if (a.x == b.x && a.y == b.y)
+            return true;
+        return false;
+    }
+
+    friend bool operator!=(const Vector2& a, const Vector2& b)
+    {
+        return !operator==(a, b);
+    }
+
 } Vector2;
 
 // Vector3, 3 components

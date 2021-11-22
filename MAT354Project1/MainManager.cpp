@@ -1,5 +1,6 @@
 #include <iostream>
 #include <limits>
+#include <algorithm>
 #include <cstdlib>
 #include "raygui.h"
 #include "MainManager.h"
@@ -8,26 +9,99 @@
 //Generate Points
 void MainManager::GeneratePoints()
 {
-    if (m_generateNewPoints)
+
+    m_points.clear();
+
+    for (int i = 0; i < m_numberOfPoints; ++i)
     {
-        m_points.clear();
+        Vector2 createNewPoint = Vector2{ static_cast<float>(rand() % GetScreenWidth()), static_cast<float>(rand() % GetScreenHeight() ) };
 
-        for (int i = 0; i < m_numberOfPoints; ++i)
+        if (m_points.empty())
         {
-            Vector2 createNewPoint = Vector2{ static_cast<float>(rand() % GetScreenWidth()), static_cast<float>(rand() % GetScreenHeight()) };
-
+            m_points.push_back(createNewPoint);
+        }
+        else
+        {
+            bool temp = false;
             //Check and make sure the points are not near each other
             for (int j = 0; j < m_points.size(); ++j)
             {
-                if (Vector2Distance(createNewPoint, m_points[j]) > MIN_DISTANCE_BETWEEN)
+                if (Vector2Distance(createNewPoint, m_points[j]) < MIN_DISTANCE_BETWEEN)
                 {
-                    m_points.push_back(createNewPoint);
+                    temp = true; --i;
+                    break;
+                }
+
+            }
+            if(!temp)
+                m_points.push_back(createNewPoint);
+        }
+    }
+
+
+}
+
+void MainManager::GenerateLinesBetweenPoints(Vector2 a, Vector2 b, Color color )
+{
+    DrawLineV(a, b, color);
+}
+
+void MainManager::GenerateConvexHull()
+{
+    m_convexHullList.clear();
+    //Variable
+    std::vector<Vector2> toBeCheckedList = m_points;
+
+
+    //Get lowest y
+    Vector2 lowestVertex = m_points[0];
+    for (auto& i : m_points)
+    {
+        if (i.y < lowestVertex.y)
+            lowestVertex = i;
+    }
+
+    Vector2 lineVector = Vector2{ 1.0f , 0.0f };
+
+    Vector2 currentVertex = lowestVertex;
+    //Remove Lowest 
+    //toBeCheckedList.erase(std::find(toBeCheckedList.begin(), toBeCheckedList.end(), lowestVertex));
+
+    do
+    {
+        float maxAngle = 0;
+        Vector2 maxVertex = currentVertex;
+
+        for (auto& vertex : toBeCheckedList)
+        {
+            Vector2 vec = Vector2Subtract(vertex, currentVertex);
+            float angle = acosf(Vector2DotProduct(vec, lineVector) / (Vector2Length(vec) * Vector2Length(lineVector)));
+            if (angle > maxAngle)
+            {
+                maxAngle = angle;
+                maxVertex = vertex;
+            }
+            else if (angle == maxAngle)
+            {
+                if (Vector2Distance(currentVertex, vertex) > Vector2Distance(currentVertex, maxVertex))
+                {
+                    maxAngle = angle;
+                    maxVertex = vertex;
                 }
             }
         }
-       
-        m_generateNewPoints = false;
-    }
+
+        m_convexHullList.push_back(maxVertex);
+        if(!toBeCheckedList.empty())
+            toBeCheckedList.erase(std::find(toBeCheckedList.begin(), toBeCheckedList.end(), maxVertex));
+
+
+        lineVector = Vector2Subtract(currentVertex , maxVertex);
+        currentVertex = maxVertex;
+
+    } while (currentVertex != lowestVertex);
+
+
 }
 
 MainManager::MainManager()
@@ -38,14 +112,11 @@ MainManager::MainManager()
 
 void MainManager::Initialize()
 {
-	std::cout << "Initialize" << std::endl;
     GeneratePoints();
-    std::cout << m_centerPos.x << "  " << m_centerPos.y << std::endl;
 }
 
 void MainManager::Update()
 {
-    //DrawText("Update", 10, 30, 20, DARKGRAY);
 
 
 }
@@ -53,17 +124,19 @@ void MainManager::Update()
 void MainManager::Draw()
 {
 
-
-   // DrawText("move the ball with arrow keys", 10, 10, 20, DARKGRAY);
-    //DrawCircleV(m_centerPos, CIRCLERADIUS, RED);
-
     for (Vector2 temp : m_points)
     {
         DrawCircleV(temp, CIRCLERADIUS, RED);
     }
 
-
-
+    if (m_generateConvexHull)
+    {
+        for (int i = 0; i < m_convexHullList.size() - 1; ++i)
+        {
+            GenerateLinesBetweenPoints(m_convexHullList[i], m_convexHullList[i + 1]);
+        }
+        GenerateLinesBetweenPoints(m_convexHullList[0], m_convexHullList[m_convexHullList.size() - 1]);
+    }
 
 
 }
@@ -78,9 +151,16 @@ void MainManager::DrawGUI()
 
     if (GuiButton(Rectangle{ 10, 40, 100, 25 }, "Generate Points"))
     {
-        m_generateNewPoints = true;
+        GeneratePoints();
     }
 
+
+    if (GuiButton(Rectangle{ 10, 75, 125, 25 }, "Generate Convex Hull"))
+    {
+        GenerateConvexHull();
+        std::cout << m_convexHullList.size() << std::endl;
+        m_generateConvexHull = !m_generateConvexHull;
+    }
 }
 
 

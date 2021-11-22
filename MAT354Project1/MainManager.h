@@ -6,7 +6,7 @@
 
 
 #define CIRCLERADIUS 10
-#define MIN_DISTANCE_BETWEEN 10.0f
+#define MIN_DISTANCE_BETWEEN 20.0f
 struct Polygon
 {
 	std::vector<
@@ -28,17 +28,19 @@ private:
 
 	bool m_generateNewPoints = true;
 
+	bool m_generateConvexHull = false;
 
 
 
 	//List of points
 	std::vector<Vector2> m_points;
+	std::vector<Vector2> m_convexHullList;
 public:
 
 	//Other functions
 	void GeneratePoints();
-
-
+	void GenerateLinesBetweenPoints(Vector2 a, Vector2 b, Color color = BLUE);
+	void GenerateConvexHull();
 
 
 
