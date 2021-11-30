@@ -15,8 +15,8 @@ int main()
 
     // Initialization
        //--------------------------------------------------------------------------------------
-    static const int WINDOW_SCREENWIDTH = 800;
-    static const int WINDOW_SCREENHEIGHT = 450;
+    static const int WINDOW_SCREENWIDTH = 1600;
+    static const int WINDOW_SCREENHEIGHT = 900;
 
     bool showGUI = true;
 
